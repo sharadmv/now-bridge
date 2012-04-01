@@ -1,13 +1,33 @@
 var Proxy = require('node-proxy');
-exports.wrap = function(entity,getter,setter) {
+
+var wrap = function(name,entity,getter,setter,func) {
+  var n = name;
   return Proxy.create({
     get:function(receiver, name){
-      getter(name);
+      getter(n.concat(name));
       return entity[name];
     },
     set:function(receiver, name, value){
-      setter(name, value);
-      entity[name] = value;
+      var temp = n.concat(name);
+      val = value;
+      if (typeof(value)=="object"){
+        setter(temp, value);
+        val = wrap(temp, value, getter, setter);
+        entity[name] = val;
+      } else if (typeof(value)=="function"){
+        console.log(temp);
+        entity[name]=Proxy.createFunction(value, function(){
+          var app = [];
+          var t = [];
+          t.push(temp);
+          for (var key in arguments){
+            app.push(arguments[key]);
+            t.push(arguments[key]);
+          }
+          func.apply(null, t);
+          value.apply(null, app);
+        });
+      }
     },
     enumerate:function(){
       var props = [];
@@ -25,3 +45,4 @@ exports.wrap = function(entity,getter,setter) {
     }
   });
 }
+exports.wrap = wrap;

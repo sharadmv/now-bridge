@@ -5,12 +5,26 @@ var Now = function(){
   var r;
   var events = {};
   var now = {};
-  var wrapper = proxy.wrap(now, 
+  var wrapper = proxy.wrap(['now'],now, 
     function(name){
-      console.log("GETTING now."+name);
     },
     function(name, value){
-      console.log("SETTING now."+name+" = "+value);
+      console.log(now);
+      bridge.publishService('now',now,function(obj){
+        bridge.getService('now',function(obj){console.log(obj)});
+      });
+    },
+    function(name){
+      var temp = arguments;
+      console.log("BLAH");
+      bridge.getService('now',function(obj){
+        var x = obj;
+        for (var i in name){
+          x = x[name[i]];
+        }
+        delete temp['0']
+        x.apply(null,temp);
+      });
     }
   ); 
   var everyone = {now:wrapper};
