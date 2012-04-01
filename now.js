@@ -5,26 +5,52 @@ var Now = function(){
   var r;
   var events = {};
   var now = {};
-  var wrapper = proxy.wrap(['now'],now, 
+  var nowWrapper = {};
+  var wrapper = proxy.wrap(['now'],nowWrapper,
     function(name){
+      var temp = now;
+      var temp2 = nowWrapper;
+      for (var i = 1;i<name.length-1;i++){
+        temp = temp[name[i]];    
+        temp2 = temp2[name[i]];
+      }
+      var val = temp[name[name.length-1]];
+      if (typeof(val) == 'function') {
+        return temp2[name[name.length-1]];
+      }
+      return temp[name[name.length-1]]
     },
     function(name, value){
-      console.log(now);
-      bridge.publishService('now',now,function(obj){
-        bridge.getService('now',function(obj){console.log(obj)});
-      });
-    },
-    function(name){
-      var temp = arguments;
-      console.log("BLAH");
-      bridge.getService('now',function(obj){
-        var x = obj;
-        for (var i in name){
-          x = x[name[i]];
+      var temp = now;
+      var temp2 = nowWrapper;
+      for (var i = 1;i<name.length-1;i++){
+        temp = temp[name[i]];    
+        temp2 = temp2[name[i]];
+      }
+      if (typeof(value) != "function"){
+        temp[name[name.length-1]] = value;
+        temp2[name[name.length-1]] = value;
+      } else {
+        temp[name[name.length-1]] = value;
+        temp2[name[name.length-1]] = function(){
+          var argus = arguments;
+          bridge.getService('now',function(obj){
+            var temp = obj;
+            for (var i = 1;i<name.length-1;i++){
+              temp = temp[name[i]];    
+            }
+            args = [];
+            for (var i in argus){
+              args.push(argus[i]);
+            }
+            temp[name[name.length-1]].apply(null,args);
+          });
         }
-        delete temp['0']
-        x.apply(null,temp);
-      });
+      }
+      bridge.publishService('now',now,function(obj){bridge.getService('now',function(obj){})});
+      return true;
+    },
+    function() {
     }
   ); 
   var everyone = {now:wrapper};
@@ -35,7 +61,6 @@ var Now = function(){
       if (typeof(r)==="function"){
         r();
       }
-      bridge.publishService('now');
     });
     return everyone;
   },
