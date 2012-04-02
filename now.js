@@ -79,7 +79,7 @@ var Now = function(){
   });
       }*/
       }
-      bridge.publishService('now',now,function(obj){bridge.getService('now',function(obj){console.log(obj);})});
+      bridge.publishService('now',now,function(obj){bridge.getService('now',function(obj){})});
       return true;
     },
     function() {
