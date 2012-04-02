@@ -6,6 +6,7 @@ var Now = function(){
   var events = {};
   var now = {};
   var nowWrapper = {};
+  var nowChannel;
   var wrapper = proxy.wrap(['now'],nowWrapper,
     function(name){
       var temp = now;
@@ -15,6 +16,35 @@ var Now = function(){
         temp2 = temp2[name[i]];
       }
       var val = temp[name[name.length-1]];
+      if (val == undefined) {
+        return proxy.wrapFunction(name,this,function(){
+          var argus = arguments;
+          if (nowChannel){
+            var temp = nowChannel;
+            for (var i = 1;i<name.length-1;i++){
+              temp = temp[name[i]];    
+            }
+            args = [];
+            for (var i in argus){
+              args.push(argus[i]);
+            }
+            temp[name[name.length-1]].apply(null,args);
+          } else {
+          bridge.getChannel('now',function(channel){
+            nowChannel = channel;
+            var temp = channel;
+            for (var i = 1;i<name.length-1;i++){
+              temp = temp[name[i]];    
+            }
+            args = [];
+            for (var i in argus){
+              args.push(argus[i]);
+            }
+            temp[name[name.length-1]].apply(null,args);
+          })
+          }
+        });
+      }
       if (typeof(val) == 'function') {
         return temp2[name[name.length-1]];
       }
@@ -32,25 +62,28 @@ var Now = function(){
         temp2[name[name.length-1]] = value;
       } else {
         temp[name[name.length-1]] = value;
-        temp2[name[name.length-1]] = function(){
-          var argus = arguments;
-          bridge.getService('now',function(obj){
-            var temp = obj;
-            for (var i = 1;i<name.length-1;i++){
-              temp = temp[name[i]];    
-            }
-            args = [];
-            for (var i in argus){
-              args.push(argus[i]);
-            }
-            temp[name[name.length-1]].apply(null,args);
-          });
-        }
+        temp2[name[name.length-1]] = value;
+        /*function(){
+         var argus = arguments;
+         bridge.getChannel('now',function(obj){
+         console.log(obj);
+         var temp = obj;
+         for (var i = 1;i<name.length-1;i++){
+         temp = temp[name[i]];    
       }
-      bridge.publishService('now',now,function(obj){bridge.getService('now',function(obj){})});
+      args = [];
+      for (var i in argus){
+      args.push(argus[i]);
+      }
+      temp[name[name.length-1]].apply(null,args);
+  });
+      }*/
+      }
+      bridge.publishService('now',now,function(obj){bridge.getService('now',function(obj){console.log(obj);})});
       return true;
     },
     function() {
+      console.log("You can't call me you fool");
     }
   ); 
   var everyone = {now:wrapper};
@@ -58,6 +91,9 @@ var Now = function(){
     bridge = new Bridge(params);
     bridge.connect();
     bridge.ready(function(){
+      bridge.getChannel('now',function(channel){
+        nowChannel = channel;
+      });
       if (typeof(r)==="function"){
         r();
       }
@@ -70,5 +106,5 @@ var Now = function(){
   this.on = function(e, callback){
     events[e] = callback;
   }
-}
-module.exports = new Now();
+  }
+  module.exports = new Now();

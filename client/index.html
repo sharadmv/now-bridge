@@ -1,11 +1,41 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <script type='text/javascript' src='/now.js'></script>
+    <title>nowjs test</title>
     <script type='text/javascript' src='/bridge.min.js'></script>
+    <script type='text/javascript' src='/now.js'></script>
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
+
     <script>
+      $(document).ready(function(){
+        now.ready(function(){
+          now.receiveMessage = function(name, message){
+            $("#messages").append("<br>" + name + ": " + message);
+          }
+
+          $("#text-input").focus();
+        });
+        $("#send-button").click(function(){
+          now.distributeMessage(name,$("#text-input").val());
+          $("#text-input").val("");
+        });
+
+        $("#text-input").keypress(function (e) {
+          if (e.which && e.which === 13) {
+            $("#send-button").click();
+            return false;
+          }
+        });
+
+        name = "Sharad"//prompt("What's your name?", "");
+
+      });
     </script>
   </head>
+
   <body>
-    INDEX
+    <div id="messages"></div>
+    <input type="text" id="text-input">
+    <input type="button" value="Send" id="send-button">
   </body>
 </html>
