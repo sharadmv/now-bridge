@@ -57,7 +57,7 @@ now = {};
     }
   }
 
-  var traverseScope = function(load) {
+  var traverseScope = function() {
     if (published) {
       if (!loaded) {
         for (var prop in now) {
@@ -75,7 +75,7 @@ now = {};
       }
     }
   }
-  setInterval(function(){traverseScope(false)}, 100);
-  traverseScope(false);
+  setInterval(function(){traverseScope()}, 100);
+  traverseScope();
 
 });
