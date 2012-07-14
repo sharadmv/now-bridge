@@ -4,8 +4,8 @@
     <script src="http://192.168.1.10:8080/now.js" type="text/javascript"></script>
     <script>
       nowjs.ready(function(){
-        now.receiveMessage = function(message){
-          $("#messages").append("<br>" + message);
+        now.receiveMessage = function(name, message){
+          $("#messages").append("<br>" + name + ": " + message);
         }
 
         $("#send-button").click(function(){
@@ -19,7 +19,7 @@
             return false;
           }
         });
-
+        now.name = prompt("What's your name?");
         $("#text-input").focus();
       });
     </script>

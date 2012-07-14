@@ -71,6 +71,18 @@ var proxy = {
   createNow : function(functionHandler, varHandler, callHandler) {
     var now = Proxy.create(nowHandler({}, functionHandler, varHandler, callHandler)) 
     return now;
+  },
+  wrapFunction : function(func, handler, callHandler) {
+    var ret = (function(f) {
+      var temp = Proxy.createFunction(handler, function() {
+        },
+        function() {
+          callHandler.apply({}, arguments);
+        }
+      );
+      return temp;
+    })(func);
+    return ret;
   }
 }
 module.exports = proxy;

@@ -9,15 +9,6 @@ var everyone = nowjs.initialize(
 );
 
 app.use(express.static("./client/"));
-nowjs.on("connect", function() {
-  console.log("Joined: " + this.now.name);
-});
-
-nowjs.on("disconnect", function() {
-  console.log("Left: " + this.now.name);
-});
 everyone.now.distributeMessage = function(message) {
-  everyone.now.receiveMessage(message);
-  everyone.now.x = message;
+  everyone.now.receiveMessage(this.now.name, message);
 };
-console.log("HEY");

@@ -6,12 +6,9 @@ var nowjs = {ready:function(ready){this.onready = ready}};
    script.type = 'text/javascript';
    script.src = url;
 
-   // then bind the event to the callback function 
-   // there are several events for cross browser compatibility
    script.onreadystatechange = callback;
    script.onload = callback;
 
-   // fire the loading
    head.appendChild(script);
 })("http://getbridge.com/js/bridge.min.js",nowjs, function() {
   var published = false;
@@ -44,11 +41,13 @@ var nowjs = {ready:function(ready){this.onready = ready}};
       myMethods[prop] = now[prop];
       methods.push(prop);
       bridge.joinChannel("now-channel-everyone", myMethods);
+    } else {
+      values[prop] = now[prop];
+      core.updateScope(prop, now[prop]);
     }
   }
 
   var traverseScope = function() {
-    console.log("traversing");
     if (published) {
       if (!loaded) {
         for (var prop in now) {
