@@ -9,3 +9,6 @@ app.use(express.static("./static/"));
 everyone.now.distributeMessage = function(message) {
   everyone.now.receiveMessage(this.now.name, message);
 };
+everyone.now.setValue = function(name, value) {
+  this.now[name] = value;
+}

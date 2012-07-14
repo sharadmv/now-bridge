@@ -7,9 +7,9 @@ var init = function(bridge) {
     var serviceName = "now-service-"+name;
     var coreServiceName = "now-core-service-"+name;
     var coreChannelName = "now-core-channel-"+name;
+    var clientService = "now-core-client-"+name;
     var coreHandler = {
       updateScope : function(name, value) {
-        console.log(name, value);
         var client = bridge.context().clientId;
         if (!scope[client]) {
           scope[client] = {};
@@ -23,7 +23,19 @@ var init = function(bridge) {
         //obj[name] = val;
         obj[name] = function() {
           var client = bridge.context().clientId;
-          val.apply({now:scope[client]}, arguments);
+          var proxy = Proxy.create({
+            get : function(receiver, name) {
+              return scope[client][name]; 
+            },
+            set : function(receiver, name, value) {
+              scope[client][name] = value;
+              var context = bridge.context();
+              context.getService(clientService, function(service) {
+                service.updateScope(name, value);
+              });
+            }
+          });
+          val.apply({now:proxy}, arguments);
         }
         bridge.publishService(serviceName, obj);
       },

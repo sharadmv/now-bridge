@@ -28,6 +28,7 @@ now = {};
     }
   }
   bridge.joinChannel("now-core-channel-everyone", coreHandler, true);
+  bridge.storeService("now-core-client-everyone", coreHandler);
   bridge.getService("now-core-service-everyone", function(c) {
     core = c;
     bridge.getService("now-service-everyone", function(n) {
