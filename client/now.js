@@ -1,6 +1,5 @@
 now = {};
 (function (url, callback) {
-    // adding the script tag to the head as suggested before
    var head = document.getElementsByTagName('head')[0];
    var script = document.createElement('script');
    script.type = 'text/javascript';
@@ -28,7 +27,7 @@ now = {};
       values[name] = value;
     }
   }
-  bridge.joinChannel("now-core-channel-everyone", coreHandler);
+  bridge.joinChannel("now-core-channel-everyone", coreHandler, true);
   bridge.getService("now-core-service-everyone", function(c) {
     core = c;
     bridge.getService("now-service-everyone", function(n) {
@@ -54,7 +53,7 @@ now = {};
     if (typeof(now[prop]) == "function") {
       myMethods[prop] = now[prop];
       //methods[prop] = now[prop];
-      bridge.joinChannel("now-channel-everyone", myMethods);
+      bridge.joinChannel("now-channel-everyone", myMethods, true);
       core.updateScope(prop, now[prop]);
     } else {
       values[prop] = now[prop];
@@ -67,19 +66,15 @@ now = {};
     } else {
       for (var prop in now) {
         if ((values[prop] != now[prop] && myMethods[prop] != now[prop]) && prop.charAt(0) != "_") {
-          console.log(values, now);
-          console.log(values[prop], now[prop]);
-          console.log(prop);
           onNew(prop);
         }
         if (!values[prop] && !myMethods[prop] && prop.charAt(0) != "_") {
-          console.log("SUP");
           onNew(prop);
         }
       }
     }
   }
-  setInterval(function(){traverseScope()}, 1000);
+  setInterval(function(){traverseScope()}, 100);
   traverseScope();
 
 });
