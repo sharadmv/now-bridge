@@ -11,7 +11,7 @@ var nowjs = {
   getGroups : function(callback) {
   },
   initialize : function(server, properties) {
-    server.get("/now.js", function(req, res) {
+    server.get("/nowjs/now.js", function(req, res) {
       fs.readFile("../client/now.js", function(err, data){
         res.writeHead(200, {'Content-Type':'text/javascript'});
         data = data.toString('ascii').replace(/API_KEY/g, properties.apiKey); 

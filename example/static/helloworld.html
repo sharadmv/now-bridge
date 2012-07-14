@@ -1,9 +1,12 @@
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
+    <title>nowjs test</title>
     <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.5.1/jquery.min.js"></script>
-    <script src="http://192.168.1.10:8080/now.js" type="text/javascript"></script>
+    <script src="/nowjs/now.js"></script>
+
     <script>
-      nowjs.ready(function(){
+      $(document).ready(function(){
         now.receiveMessage = function(name, message){
           $("#messages").append("<br>" + name + ": " + message);
         }
@@ -19,7 +22,9 @@
             return false;
           }
         });
-        now.name = prompt("What's your name?");
+
+        now.name = prompt("What's your name?", "");
+
         $("#text-input").focus();
       });
     </script>

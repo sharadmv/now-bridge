@@ -1,5 +1,5 @@
-var nowjs = {ready:function(ready){this.onready = ready}};
-(function (url, nowjs, callback) {
+now = {};
+(function (url, callback) {
     // adding the script tag to the head as suggested before
    var head = document.getElementsByTagName('head')[0];
    var script = document.createElement('script');
@@ -10,11 +10,12 @@ var nowjs = {ready:function(ready){this.onready = ready}};
    script.onload = callback;
 
    head.appendChild(script);
-})("http://getbridge.com/js/bridge.min.js",nowjs, function() {
+})("http://getbridge.com/js/bridge.min.js", function() {
   var published = false;
   var loaded = false;
   var ready;
-  var methods = [];
+  var core;
+  var methods = {};
   var values = {};
   var myMethods = {};
   var bridge = new Bridge({
@@ -28,10 +29,18 @@ var nowjs = {ready:function(ready){this.onready = ready}};
     }
   }
   bridge.joinChannel("now-core-channel-everyone", coreHandler);
-  bridge.getService("now-core-service-everyone", function(core) {
-    window.core = core;
+  bridge.getService("now-core-service-everyone", function(c) {
+    core = c;
     bridge.getService("now-service-everyone", function(n) {
+      temp = {};
+      for (var i in now) {
+        temp[i] = now[i];
+      }
       now = n;
+      for (var i in temp) {
+        now[i] = temp[i];
+        onNew(i);
+      }
       published = true;
     });
   });
@@ -39,7 +48,7 @@ var nowjs = {ready:function(ready){this.onready = ready}};
   var onNew = function(prop) {
     if (typeof(now[prop]) == "function") {
       myMethods[prop] = now[prop];
-      methods.push(prop);
+      methods[prop] = now[prop];
       bridge.joinChannel("now-channel-everyone", myMethods);
       core.updateScope(prop, now[prop]);
     } else {
@@ -48,26 +57,25 @@ var nowjs = {ready:function(ready){this.onready = ready}};
     }
   }
 
-  var traverseScope = function() {
+  var traverseScope = function(load) {
     if (published) {
       if (!loaded) {
         for (var prop in now) {
           if (prop.charAt(0) != "_") {
-            methods.push(prop);
+            methods[prop] = now[prop];
           }
         }
-        nowjs.onready();
         loaded = true;
       } else {
         for (var prop in now) {
-          if (!values[prop] && methods.indexOf(prop) == -1 && prop.charAt(0) != "_") {
+          if (!values[prop] && !methods[prop] && prop.charAt(0) != "_") {
             onNew(prop);
           }
         }
       }
     }
   }
-  setInterval(traverseScope, 1000);
-  traverseScope();
+  setInterval(function(){traverseScope(false)}, 100);
+  traverseScope(false);
 
 });
