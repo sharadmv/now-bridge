@@ -39,7 +39,6 @@ var nowHandler = function(obj, funcHandler, varHandler, callHandler) {
     hasOwn:       function(name) { return Object.prototype.hasOwnProperty.call(obj, name); },
     get:          function(receiver, name) { 
       var p = Proxy.createFunction({}, function() { }, function() { });
-      console.log(obj, name);
       if (name == 'inspect') {
         return obj[name];
       } else {

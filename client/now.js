@@ -18,7 +18,7 @@ var nowjs = {ready:function(ready){this.onready = ready}};
   var values = {};
   var myMethods = {};
   var bridge = new Bridge({
-    apiKey : "73f5782c2019878a"
+    apiKey : "API_KEY"
   });
   bridge.connect();
   var coreHandler = {
@@ -41,6 +41,7 @@ var nowjs = {ready:function(ready){this.onready = ready}};
       myMethods[prop] = now[prop];
       methods.push(prop);
       bridge.joinChannel("now-channel-everyone", myMethods);
+      core.updateScope(prop, now[prop]);
     } else {
       values[prop] = now[prop];
       core.updateScope(prop, now[prop]);

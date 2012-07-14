@@ -9,6 +9,7 @@ var init = function(bridge) {
     var coreChannelName = "now-core-channel-"+name;
     var coreHandler = {
       updateScope : function(name, value) {
+        console.log(name, value);
         var client = bridge.context().clientId;
         if (!scope[client]) {
           scope[client] = {};
@@ -21,7 +22,6 @@ var init = function(bridge) {
         methods[name] = val;
         //obj[name] = val;
         obj[name] = function() {
-          console.log("SUP");
           var client = bridge.context().clientId;
           val.apply({now:scope[client]}, arguments);
         }
