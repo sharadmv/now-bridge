@@ -37,6 +37,11 @@ now = {};
         temp[i] = now[i];
       }
       now = n;
+      for (var i in now) {
+        if (i.charAt(0) != "_") {
+          methods[i] = now[i];
+        }
+      }
       for (var i in temp) {
         now[i] = temp[i];
         onNew(i);
@@ -48,7 +53,7 @@ now = {};
   var onNew = function(prop) {
     if (typeof(now[prop]) == "function") {
       myMethods[prop] = now[prop];
-      methods[prop] = now[prop];
+      //methods[prop] = now[prop];
       bridge.joinChannel("now-channel-everyone", myMethods);
       core.updateScope(prop, now[prop]);
     } else {
@@ -58,24 +63,23 @@ now = {};
   }
 
   var traverseScope = function() {
-    if (published) {
-      if (!loaded) {
-        for (var prop in now) {
-          if (prop.charAt(0) != "_") {
-            methods[prop] = now[prop];
-          }
+    if (!published) {
+    } else {
+      for (var prop in now) {
+        if ((values[prop] != now[prop] && myMethods[prop] != now[prop]) && prop.charAt(0) != "_") {
+          console.log(values, now);
+          console.log(values[prop], now[prop]);
+          console.log(prop);
+          onNew(prop);
         }
-        loaded = true;
-      } else {
-        for (var prop in now) {
-          if (!values[prop] && !methods[prop] && prop.charAt(0) != "_") {
-            onNew(prop);
-          }
+        if (!values[prop] && !myMethods[prop] && prop.charAt(0) != "_") {
+          console.log("SUP");
+          onNew(prop);
         }
       }
     }
   }
-  setInterval(function(){traverseScope()}, 100);
+  setInterval(function(){traverseScope()}, 1000);
   traverseScope();
 
 });
