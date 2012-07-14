@@ -4,7 +4,7 @@ app.listen(8080);
 var nowjs = require("./now.js");
 var everyone = nowjs.initialize(
   {
-    apiKey : "3083805b"
+    apiKey : "73f5782c2019878a"
   }
 );
 
@@ -17,10 +17,7 @@ nowjs.on("disconnect", function() {
   console.log("Left: " + this.now.name);
 });
 everyone.now.distributeMessage = function(message) {
-  console.log(message);
-//  everyone.now.receiveMessage(message);
+  everyone.now.receiveMessage(message);
+  everyone.now.x = message;
 };
-console.log(everyone);
-setTimeout(function(){
-  everyone.now.distributeMessage("SUP");
-},3000);
+console.log("HEY");

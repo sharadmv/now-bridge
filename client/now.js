@@ -18,20 +18,33 @@ var nowjs = {ready:function(ready){this.onready = ready}};
   var loaded = false;
   var ready;
   var methods = [];
+  var values = {};
   var myMethods = {};
   var bridge = new Bridge({
-    apiKey : "3083805b"
+    apiKey : "73f5782c2019878a"
   });
   bridge.connect();
-  bridge.getService("now-service-everyone", function(n) {
-    now = n;
-    published = true;
+  var coreHandler = {
+    updateScope : function(name, value) {
+      now[name] = value;
+      values[name] = value;
+    }
+  }
+  bridge.joinChannel("now-core-channel-everyone", coreHandler);
+  bridge.getService("now-core-service-everyone", function(core) {
+    window.core = core;
+    bridge.getService("now-service-everyone", function(n) {
+      now = n;
+      published = true;
+    });
   });
 
   var onNew = function(prop) {
-    myMethods[prop] = now[prop];
-    methods.push(prop);
-    bridge.joinChannel("now-channel-everyone", myMethods);
+    if (typeof(now[prop]) == "function") {
+      myMethods[prop] = now[prop];
+      methods.push(prop);
+      bridge.joinChannel("now-channel-everyone", myMethods);
+    }
   }
 
   var traverseScope = function() {
@@ -47,7 +60,7 @@ var nowjs = {ready:function(ready){this.onready = ready}};
         loaded = true;
       } else {
         for (var prop in now) {
-          if (methods.indexOf(prop) == -1 && prop.charAt(0) != "_") {
+          if (!values[prop] && methods.indexOf(prop) == -1 && prop.charAt(0) != "_") {
             onNew(prop);
           }
         }

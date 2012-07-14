@@ -1,5 +1,5 @@
 var Proxy = require('node-proxy');
-var nowHandler = function(obj, funcHandler, varHandler) {
+var nowHandler = function(obj, funcHandler, varHandler, callHandler) {
   return {
     // Fundamental traps
     getOwnPropertyDescriptor: function(name) {
@@ -37,7 +37,19 @@ var nowHandler = function(obj, funcHandler, varHandler) {
     // derived traps
     has:          function(name) { return name in obj; },
     hasOwn:       function(name) { return Object.prototype.hasOwnProperty.call(obj, name); },
-    get:          function(receiver, name) { return obj[name]; },
+    get:          function(receiver, name) { 
+      var p = Proxy.createFunction({}, function() { }, function() { });
+      console.log(obj, name);
+      if (name == 'inspect') {
+        return obj[name];
+      } else {
+        return Proxy.createFunction(obj, function() {
+          callHandler(name, arguments);
+        }, 
+        function() {
+        }); 
+      }
+    },
     set:          function(receiver, name, val) { 
       if (typeof(val) == "function") {
         funcHandler(obj, receiver, name, val);
@@ -56,8 +68,8 @@ var nowHandler = function(obj, funcHandler, varHandler) {
 }
 
 var proxy = {
-  createNow : function(functionHandler, varHandler) {
-    var now = Proxy.create(nowHandler({}, functionHandler, varHandler)) 
+  createNow : function(functionHandler, varHandler, callHandler) {
+    var now = Proxy.create(nowHandler({}, functionHandler, varHandler, callHandler)) 
     return now;
   }
 }
