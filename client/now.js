@@ -31,6 +31,7 @@ now = {};
   bridge.storeService("now-core-client-everyone", coreHandler);
   bridge.getService("now-core-service-everyone", function(c) {
     core = c;
+    core.connect();
     bridge.getService("now-service-everyone", function(n) {
       temp = {};
       for (var i in now) {

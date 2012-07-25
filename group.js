@@ -1,14 +1,48 @@
 var Proxy = require('node-proxy');
 var proxy = require('./proxy.js');
-var init = function(bridge) {
-  var Now = function(name) {
+Object.size = function(obj) {
+  var size = 0, key;
+  for (key in obj) {
+    if (obj.hasOwnProperty(key)) size++;
+  }
+  return size;
+};
+var init = function(bridge, trigger) {
+  var Now = function(name, c) {
+    var self = this;
+    self.clients = {};
     var scope = {};
     var methods = {};
+    var clients = c;
     var serviceName = "now-service-"+name;
     var coreServiceName = "now-core-service-"+name;
     var coreChannelName = "now-core-channel-"+name;
     var clientService = "now-core-client-"+name;
+    var getScope = function(client) {
+      var proxy = Proxy.create({
+        get : function(receiver, name) {
+          return scope[client][name]; 
+        },
+        set : function(receiver, name, value) {
+          if (!scope[client]) {
+            scope[client] = {};
+          }
+          scope[client][name] = value;
+          var context = bridge.context();
+          context.getService(clientService, function(service) {
+            service.updateScope(name, value);
+          });
+        }
+      });
+      return proxy;
+    }
     var coreHandler = {
+      connect : function() {
+        var client = bridge.context().clientId;
+        self.clients[client] = bridge.context();
+        clients[client] = bridge.context();
+        trigger("connect", {user:{clientId:client}, now:getScope(client)});
+      },
       updateScope : function(name, value) {
         var client = bridge.context().clientId;
         if (!scope[client]) {
@@ -23,19 +57,7 @@ var init = function(bridge) {
         //obj[name] = val;
         obj[name] = function() {
           var client = bridge.context().clientId;
-          var proxy = Proxy.create({
-            get : function(receiver, name) {
-              return scope[client][name]; 
-            },
-            set : function(receiver, name, value) {
-              scope[client][name] = value;
-              var context = bridge.context();
-              context.getService(clientService, function(service) {
-                service.updateScope(name, value);
-              });
-            }
-          });
-          val.apply({now:proxy}, arguments);
+          val.apply({user:{clientId:client}, now:getScope(client)}, arguments);
         }
         bridge.publishService(serviceName, obj);
       },
@@ -53,9 +75,19 @@ var init = function(bridge) {
     );
     bridge.publishService(coreServiceName, coreHandler);
   }
-  var Group = function(name) {
+  var Group = function(name, clients) {
     this.groupName = name;
-    this.now = (new Now(name)).now; 
+    var temp = (new Now(name, clients));
+    this.now = temp.now; 
+    this.count = function(cb) {
+      if (typeof(cb) == "function") {
+        cb(Object.size(temp.clients));
+      }
+      return Object.size(temp.clients);
+    }
+    this.addUser = function(id) {
+      var context = clients[id];
+    }
   }
   return Group;
 }

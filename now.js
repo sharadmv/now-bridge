@@ -5,8 +5,13 @@ var proxy = require('./proxy.js');
 var emitter = {};
 var Group; 
 var groups = {};
+var clients = {};
 var nowjs = {
   getGroup : function(group) {
+    if (!groups[group]) {
+      groups[group] = new Group(group, clients);
+    }
+    return groups[group];
   },
   getGroups : function(callback) {
   },
@@ -21,8 +26,8 @@ var nowjs = {
     });
     bridge = new Bridge(properties);
     bridge.connect();
-    Group = require('./group.js')(bridge);
-    return new Group("everyone");
+    Group = require('./group.js')(bridge, trigger);
+    return new Group("everyone", clients);
   },
   on : function(event, callback) {
     if (!emitter.event) {
@@ -32,11 +37,11 @@ var nowjs = {
   }
 }
 
-var trigger = function(event) {
+var trigger = function(event, scope) {
   if (emitter.event) {
     for (var cb in emitter.event) {
-      if (typeof(cb) == "function") {
-        cb();
+      if (typeof(emitter.event[cb]) == "function") {
+        emitter.event[cb].apply(scope, []);
       }
     }
   }
