@@ -73,6 +73,7 @@ var init = function(bridge, trigger) {
         })
       }
     );
+    console.log(coreServiceName);
     bridge.publishService(coreServiceName, coreHandler);
   }
   var Group = function(name, clients) {

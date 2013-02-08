@@ -21,33 +21,38 @@ now = {};
     apiKey : "API_KEY"
   });
   bridge.connect();
+  window.bridge = bridge;
   var coreHandler = {
     updateScope : function(name, value) {
       now[name] = value;
       values[name] = value;
     }
   }
-  bridge.joinChannel("now-core-channel-everyone", coreHandler, true);
-  bridge.storeService("now-core-client-everyone", coreHandler);
-  bridge.getService("now-core-service-everyone", function(c) {
-    core = c;
-    core.connect();
-    bridge.getService("now-service-everyone", function(n) {
-      temp = {};
-      for (var i in now) {
-        temp[i] = now[i];
-      }
-      now = n;
-      for (var i in now) {
-        if (i.charAt(0) != "_") {
-          methods[i] = now[i];
+  bridge.ready(function() {
+    bridge.joinChannel("now-core-channel-everyone", coreHandler, true);
+    bridge.storeService("now-core-client-everyone", coreHandler);
+    bridge.getService("now-core-service-everyone", function(c) {
+      console.log(c);
+      core = c;
+      core.connect();
+      bridge.getService("now-service-everyone", function(n) {
+        console.log(n);
+        temp = {};
+        for (var i in now) {
+          temp[i] = now[i];
         }
-      }
-      for (var i in temp) {
-        now[i] = temp[i];
-        onNew(i);
-      }
-      published = true;
+        now = n;
+        for (var i in now) {
+          if (i.charAt(0) != "_") {
+            methods[i] = now[i];
+          }
+        }
+        for (var i in temp) {
+          now[i] = temp[i];
+          onNew(i);
+        }
+        published = true;
+      });
     });
   });
 
